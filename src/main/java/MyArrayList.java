@@ -1,7 +1,9 @@
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-public class MyArrayList<T> implements MyList<T> {
+public class MyArrayList<T extends Comparable<T>> implements MyList<T>, Iterable<T> {
 
     private enum MoveDirection {FORWARD, BACKWARD}
 
@@ -9,7 +11,6 @@ public class MyArrayList<T> implements MyList<T> {
     private Object[] elements;
     private int lastIndex;
     private Comparator<? super T> comparator;
-    private final Comparator<T> hashComparator = Comparator.comparingInt(Object::hashCode);
 
     public MyArrayList() {
         arrayInit(0);
@@ -36,6 +37,26 @@ public class MyArrayList<T> implements MyList<T> {
             elements = new Object[INITIAL_CAPACITY];
 
         lastIndex = 0;
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return index < lastIndex;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return (T) elements[index++];
+            }
+        };
     }
 
     @Override
@@ -152,8 +173,8 @@ public class MyArrayList<T> implements MyList<T> {
 
     @Override
     public void sort() {
-        if (comparator == null) {
-            comparator = hashComparator;
+        if (elements.length < 2) {
+            return;
         }
         sortElements(0, lastIndex - 1);
     }
@@ -165,6 +186,8 @@ public class MyArrayList<T> implements MyList<T> {
             if (length <= 11) {
                 insertionSort(left, right);
             } else {
+                normalize(left, right);
+
                 int pivotPosAfterSort = miniSort(left, right);
 
                 sortElements(left, pivotPosAfterSort - 1);
@@ -179,35 +202,53 @@ public class MyArrayList<T> implements MyList<T> {
             T obj = (T) elements[out];
             int mark = out;
 
-            while (mark > leftPos && comparator.compare((T) elements[mark - 1], obj) > 0) {
-                elements[mark] = elements[mark - 1];
-                mark--;
+            if (comparator != null) {
+                while (mark > leftPos && comparator.compare((T) elements[mark - 1], obj) > 0) {
+                    elements[mark] = elements[mark - 1];
+                    mark--;
+                }
+            } else {
+                while (mark > leftPos && ((T) elements[mark - 1]).compareTo(obj) > 0) {
+                    elements[mark] = elements[mark - 1];
+                    mark--;
+                }
             }
 
             elements[mark] = obj;
         }
     }
 
+
     @SuppressWarnings("unchecked")
     private void normalize(int leftPos, int rightPos) {
         T leftElem = (T) elements[leftPos];
         T rightElem = (T) elements[rightPos];
 
-        if (comparator.compare(leftElem, rightElem) > 0) {
-            swap(leftPos, rightPos);
+        if (comparator != null) {
+            if (comparator.compare(leftElem, rightElem) > 0) {
+                swap(leftPos, rightPos);
+            }
+        } else {
+            if (leftElem.compareTo(rightElem) > 0) {
+                swap(leftPos, rightPos);
+            }
         }
     }
 
     @SuppressWarnings("unchecked")
     private int miniSort(int left, int right) {
-        int leftPos = left -1;
+        int leftPos = left - 1;
         int rightPos = right;
         T pivotElement = (T) elements[right];
 
         while (true) {
-            while (comparator.compare((T) elements[++leftPos], pivotElement) < 0);
-
-            while (rightPos > 0 && comparator.compare((T) elements[--rightPos], pivotElement) > 0);
+            if (comparator != null) {
+                while (comparator.compare((T) elements[++leftPos], pivotElement) < 0) ;
+                while (rightPos > 0 && comparator.compare((T) elements[--rightPos], pivotElement) > 0) ;
+            } else {
+                while (((T) elements[++leftPos]).compareTo(pivotElement) < 0) ;
+                while (rightPos > 0 && ((T) elements[--rightPos]).compareTo(pivotElement) > 0) ;
+            }
 
             if (leftPos >= rightPos) {
                 break;

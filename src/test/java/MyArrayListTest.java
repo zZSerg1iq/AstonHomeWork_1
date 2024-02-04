@@ -1,3 +1,4 @@
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -14,9 +15,19 @@ class MyArrayListTest {
     private String testStr = "Безумно, можно быть первым Безумно, можно через стены Я шерстяной волчара, боже, как я хорош, как мощны мои лапищи Редко когда думаю, а еще реже думаю АУФ";
 
 
-    private static class Person {
-        private String name;
-        private int age;
+    private static class Person implements Comparable<Person>{
+
+        @Override
+        public int compareTo(@NotNull Person o) {
+            int nameCompare = this.getName().compareTo(o.getName());
+            if (nameCompare == 0){
+                return Integer.compare(this.getAge(), o.getAge());
+            }
+            return nameCompare;
+        }
+
+        private final String name;
+        private final int age;
 
         public Person(String name, int age) {
             this.name = name;
@@ -29,27 +40,6 @@ class MyArrayListTest {
 
         public int getAge() {
             return age;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Person person = (Person) o;
-            return age == person.age && Objects.equals(name, person.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name, age);
-        }
-
-        @Override
-        public String toString() {
-            return "Person{" +
-                    "name='" + name + '\'' +
-                    ", age=" + age +
-                    '}';
         }
     }
 
@@ -249,6 +239,7 @@ class MyArrayListTest {
         assertEquals("g", persons.get(6).name);
         assertEquals("r", persons.get(7).name);
     }
+
 
     private String getRandomString(){
         int start = random.nextInt(testStr.length());
