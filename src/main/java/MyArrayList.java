@@ -7,7 +7,7 @@ public class MyArrayList<T extends Comparable<T>> implements MyList<T>, Iterable
 
     private enum MoveDirection {FORWARD, BACKWARD}
 
-    private final int INITIAL_CAPACITY = 16;
+    private static final int INITIAL_CAPACITY = 16;
     private Object[] elements;
     private int lastIndex;
     private Comparator<? super T> comparator;
@@ -32,7 +32,7 @@ public class MyArrayList<T extends Comparable<T>> implements MyList<T>, Iterable
 
     private void arrayInit(int capacity) {
         if (capacity > INITIAL_CAPACITY) {
-            elements = new Object[capacity];
+            elements = new Object[capacity]; // не забывай про скобки, они улучшают читаемость
         } else
             elements = new Object[INITIAL_CAPACITY];
 
@@ -136,8 +136,7 @@ public class MyArrayList<T extends Comparable<T>> implements MyList<T>, Iterable
     @Override
     public boolean remove(T element) {
         for (int i = 0; i < lastIndex; i++) {
-            T elem = getElement(i);
-            if (element.equals(elem)) {
+            if (element.equals(elements[i])) {
                 movePartOfArray(i, MoveDirection.BACKWARD);
                 lastIndex--;
                 return true;
@@ -153,17 +152,19 @@ public class MyArrayList<T extends Comparable<T>> implements MyList<T>, Iterable
     }
 
     private void movePartOfArray(int index, MoveDirection direction) {
-        switch (direction) {
-            case FORWARD -> System.arraycopy(
+        if (MoveDirection.FORWARD.equals(direction)) {
+            System.arraycopy(
                     elements, index,
                     elements, index + 1,
-                    lastIndex - index + 1);
-
-            case BACKWARD -> System.arraycopy(
-                    elements, index + 1,
-                    elements, index,
-                    lastIndex - index);
+                    lastIndex - index + 1
+            );
+            return;
         }
+        System.arraycopy(
+                elements, index + 1,
+                elements, index,
+                lastIndex - index
+        );
     }
 
     @Override

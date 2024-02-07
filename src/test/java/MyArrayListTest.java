@@ -11,11 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MyArrayListTest {
 
-    private Random random = new Random();
-    private String testStr = "Безумно, можно быть первым Безумно, можно через стены Я шерстяной волчара, боже, как я хорош, как мощны мои лапищи Редко когда думаю, а еще реже думаю АУФ";
+    private final Random random = new Random();
 
 
-    private static class Person implements Comparable<Person>{
+    private static class Person implements Comparable<Person>{ // статический класс вложенный в тест тут лишний) его бы в отдельный файл
 
         @Override
         public int compareTo(@NotNull Person o) {
@@ -67,7 +66,7 @@ class MyArrayListTest {
         }
         assertEquals(20, myStringList.size());
         for (int i = 5; i < 15; i++) {
-            assertEquals(myStringList.get(i), "index 5");
+            assertEquals(myStringList.get(i), "index 5"); // прочитай про параметризованные тесты
         }
     }
 
@@ -112,7 +111,7 @@ class MyArrayListTest {
 
         assertFalse(personList.contains(boy));
         assertFalse(personList.contains(oldMan));
-        assertFalse(personList.contains(dunkan));
+        assertFalse(personList.contains(dunkan)); // когда много ассертов добавляй их в assertAll
 
 
         personList.add(2, boy);
@@ -242,6 +241,7 @@ class MyArrayListTest {
 
 
     private String getRandomString(){
+        String testStr = "Безумно, можно быть первым Безумно, можно через стены Я шерстяной волчара, боже, как я хорош, как мощны мои лапищи Редко когда думаю, а еще реже думаю АУФ";
         int start = random.nextInt(testStr.length());
         int end = random.nextInt(testStr.length());
 
